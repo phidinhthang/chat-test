@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="w-52">
+      base input
+      <input
+        type="text"
+        class="
+          bg-white
+          w-full
+          py-1.5
+          px-4
+          rounded-md
+          text-black text-md
+          focus:outline-none
+          placeholder-gray-500
+          border border-gray-400
+          focus:ring-2 focus:border-none focus:border-white
+          ring-blue-500
+        "
+        placeholder="placeholder"
+      />
+    </div>
+
+    <div class="w-52">
+      input error
+      <input
+        type="text"
+        class="
+          bg-white
+          w-full
+          py-1.5
+          px-4
+          rounded-md
+          text-black text-md
+          focus:outline-none
+          placeholder-gray-500
+          border border-gray-400
+          focus:ring-2 focus:border-none focus:border-white
+          <!--
+          add
+          oon
+          -->
+          border-none
+          outline-none
+          ring-2 ring-red-500
+          placeholder-red-500
+          text-red-600
+        "
+        placeholder="placeholder"
+      />
+    </div>
+
+    <div class="w-52">
+      error message
+      <div class="flex text-red-600 text-sm">error message</div>
+    </div>
+  </body>
+</html>

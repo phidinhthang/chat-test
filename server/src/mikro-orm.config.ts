@@ -4,6 +4,8 @@ import { User } from './entities/User';
 import path from 'path';
 import { __isProd__ } from './utils/constants';
 import { MikroORM, Options } from '@mikro-orm/core';
+import { Conversation } from './entities/Conversation';
+import { Message } from './entities/Message';
 
 const config = {
   migrations: {
@@ -11,7 +13,7 @@ const config = {
     pattern: /^[\w-]+\d+\.[tj]s$/,
     disableForeignKeys: false,
   },
-  entities: [User],
+  entities: [User, Conversation, Message],
   type: 'postgresql',
   clientUrl: process.env.DATABASE_URL,
   debug: true,

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <title>Base</title>
+  </head>
+  <body>
+    <div>
+      <div>
+        button primary big
+        <button
+          class="
+            bg-blue-600
+            hover:bg-blue-700
+            text-white
+            transition
+            duration-100
+            ease-in-out
+            focus:ring-2
+            <!--
+            size
+            big
+            -->
+            py-2
+            px-5
+            text-md
+            rounded-lg
+          "
+        >
+          Primary Big
+        </button>
+      </div>
+      <div>
+        Secondary big
+        <button
+          class="
+            bg-gray-700
+            hover:bg-gray-800
+            text-white
+            transition
+            duration-100
+            ease-in-out
+            focus:ring-2
+            <!--
+            size
+            big
+            -->
+            py-2
+            px-5
+            text-md
+            rounded-lg
+          "
+        >
+          Secondary Big
+        </button>
+      </div>
+      <div>
+        With spinner
+        <button
+          class="
+            bg-gray-700
+            text-white
+            transition
+            duration-100
+            ease-in-out
+            focus:ring-2
+            <!--
+            size
+            big
+            -->
+            py-2
+            px-5
+            text-md
+            rounded-lg
+            <!--
+            initial
+            css
+            -->
+            flex
+            outline-none
+            font-bold
+            items-center
+            justify-center
+            <!--
+            loading
+            -->
+            hover:bg-gray-700
+            cursor-not-allowed
+          "
+          disabled="disabled"
+        >
+          <span class="opacity-0"> Secondary Big </span>
+          <span class="absolute">
+            <svg
+              class="animate-spin text-white h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+    <div class="my-2 bg-white">
+      spinner size 5
+      <div class="bg-blue-500 w-10">
+        <svg
+          class="animate-spin text-white h-5 w-5"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+      </div>
+    </div>
+  </body>
+</html>

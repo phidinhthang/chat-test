@@ -7,6 +7,7 @@ import { sendRefreshToken } from '../utils/sendRefreshToken';
 import { createRefreshToken } from '../utils/createRefreshToken';
 import { createAccessToken } from '../utils/createAccessToken';
 import { getUserId } from '../utils/getUserId';
+import { Conversation } from '../entities/Conversation';
 
 export const register = async (req: Request, res: Response) => {
   const { username, password }: { username: string; password: string } =
@@ -72,9 +73,13 @@ export const getMe = async (req: Request, res: Response) => {
     return res.status(403).json({ message: 'token expired' });
   }
 
-  const user = await em.findOne(User, {
-    id: userId,
-  });
+  const user = await em.fork().findOne(
+    User,
+    {
+      id: userId,
+    },
+    { fields: ['id', 'username'] }
+  );
 
   return res.status(200).json({ user });
 };
@@ -189,7 +194,31 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
   user.friends.add(other);
   other.requests.remove(em.getReference(User, user.id));
   other.friends.add(user);
-  await em.persistAndFlush([user, other]);
+
+  let conversation = await em.findOne(Conversation, {
+    $or: [
+      {
+        ownerOne: userId,
+        ownerTwo: otherId,
+      },
+      {
+        ownerOne: otherId,
+        ownerTwo: userId,
+      },
+    ],
+  });
+
+  if (!conversation) {
+    console.log('create new conversation');
+    const user = await em.findOneOrFail(User, userId);
+    const other = await em.findOneOrFail(User, otherId);
+    conversation = em.create(Conversation, {
+      ownerOne: user,
+      ownerTwo: other,
+    });
+  }
+
+  await em.persistAndFlush([user, other, conversation]);
 
   return res.status(200).send(true);
 };
