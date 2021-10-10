@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { Form, Formik } from 'formik';
 import { useMutation, useQueryClient } from 'react-query';
 import { client } from '../services/client';
 import { setAccessToken } from '../lib/accessToken';
 import { LoginInput } from '../types/input/LoginInput';
 import { UserResponse } from '../types/response/User';
+import { Button } from '../ui/Button';
+import { InputField } from '../ui/InputField';
 
 export const Login: React.FC<RouteComponentProps> = ({ history }) => {
   const queryClient = useQueryClient();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const { mutate, isError, error, isLoading } = useMutation(
+  const { mutate, isError, error } = useMutation(
     ({ username, password }: LoginInput) =>
       client.post<LoginInput, UserResponse>('/login', { username, password })
   );
 
   return (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault();
-        console.log('form submitted');
+    <Formik
+      initialValues={{ username: '', password: '' }}
+      onSubmit={async ({ username, password }, {}) => {
         mutate(
           { username, password },
           {
@@ -32,29 +32,33 @@ export const Login: React.FC<RouteComponentProps> = ({ history }) => {
         );
       }}
     >
-      <div>
-        <input
-          value={username}
-          placeholder='username'
-          onChange={(e) => {
-            setUsername(e.target.value);
-          }}
-        />
-      </div>
-      <div>
-        <input
-          type='password'
-          value={password}
-          placeholder='password'
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
-        />
-      </div>
-      <button type='submit' disabled={isLoading}>
-        Submit
-      </button>
-      <pre>{isError ? JSON.stringify(error, null, 2) : null}</pre>
-    </form>
+      {({ isSubmitting }) => (
+        <Form>
+          <div className='w-80 mx-auto'>
+            <div>
+              <InputField
+                label='Username'
+                name='username'
+                placeholder='Username'
+              />
+            </div>
+            <div>
+              <InputField
+                label='Password'
+                name='password'
+                type='password'
+                placeholder='password'
+              />
+            </div>
+            <div className='mt-5 flex items-start justify-center'>
+              <Button loading={isSubmitting} type='submit'>
+                Submit
+              </Button>
+            </div>
+            <pre>{isError ? JSON.stringify(error, null, 2) : null}</pre>
+          </div>
+        </Form>
+      )}
+    </Formik>
   );
 };

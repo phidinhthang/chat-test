@@ -41,6 +41,12 @@ export const Header = () => {
         <Link to='/friends'>Friends</Link>
       </div>
       <div>
+        <Link to='/chat'>chat</Link>
+      </div>
+      <div>
+        <Link to='/test'>test</Link>
+      </div>
+      <div>
         {!isLoading && data ? (
           <button
             onClick={async () => {
