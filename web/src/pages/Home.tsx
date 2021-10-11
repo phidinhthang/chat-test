@@ -1,7 +1,7 @@
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { client } from '../services/client';
-import { User } from '../types/response/User';
+import { User } from '../services/response/User';
 
 export const Home = () => {
   const queryClient = useQueryClient();

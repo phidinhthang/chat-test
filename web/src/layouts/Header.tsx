@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { setAccessToken } from '../lib/accessToken';
-import { User } from '../types/response/User';
+import { User } from '../services/response/User';
 import { client } from '../services/client';
 
 export const Header = () => {

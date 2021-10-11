@@ -7,13 +7,16 @@ export const client = axios.create({
   withCredentials: true,
 });
 
+export const requestWithoutToken = axios.create({
+  baseURL: 'http://localhost:4000',
+});
+
 client.interceptors.request.use(async (config) => {
   const token = getAccessToken();
   let refresh = false;
   if (!token) refresh = true;
   if (token) {
     const { exp }: { exp: number } = jwtDecode(token);
-    console.log(exp);
     if (Date.now() >= exp * 1000) {
       refresh = true;
     }

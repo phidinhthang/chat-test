@@ -21,6 +21,12 @@ export class User {
   @Property()
   password!: string;
 
+  @Property()
+  isOnline: boolean = false;
+
+  @Property()
+  lastLoginAt: Date = new Date();
+
   @ManyToMany(() => User, undefined, {
     joinColumn: 'userId',
     inverseJoinColumn: 'friendId',

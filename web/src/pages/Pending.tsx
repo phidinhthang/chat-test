@@ -1,22 +1,12 @@
 import React from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { client } from '../services/client';
-import { User } from '../types/response/User';
+import { useAcceptFriendRequest } from '../services/mutations/useAcceptFriendRequest';
+import { useCancelFriendRequest } from '../services/mutations/useCancelFriendRequest';
+import { useGetPendingRequests } from '../services/query/useGetPendingRequests';
 
 export const Pending = () => {
-  const queryClient = useQueryClient();
-  const { data, isLoading, error, isError } = useQuery('pendings', () =>
-    client.get<undefined, (User & { type: 0 | 1 })[]>('/pending')
-  );
-  const { mutate: accept, isLoading: isAccepting } = useMutation((id: string) =>
-    client.post<{ otherId: string }, boolean>('/acceptRequest', { otherId: id })
-  );
-  const { mutate: cancel, isLoading: isCancelling } = useMutation(
-    (id: string) =>
-      client.post<{ otherId: string }, boolean>('/cancelRequest', {
-        otherId: id,
-      })
-  );
+  const { pendings, isLoading, isError, error } = useGetPendingRequests();
+  const { isAccepting, accept } = useAcceptFriendRequest();
+  const { cancel, isCancelling } = useCancelFriendRequest();
 
   if (isLoading) {
     return <div>loading...</div>;
@@ -31,7 +21,7 @@ export const Pending = () => {
     <div>
       <ul>
         <p>received</p>
-        {data
+        {pendings
           ?.filter((i) => i.type)
           .map((pending) => (
             <li
@@ -42,35 +32,7 @@ export const Pending = () => {
               <button
                 disabled={isAccepting}
                 onClick={async () => {
-                  accept(pending.id, {
-                    onSuccess: (data, id) => {
-                      if (data) {
-                        queryClient.setQueryData<User[] | undefined>(
-                          'friends',
-                          (friends) => {
-                            if (friends && Array.isArray(friends)) {
-                              return [
-                                ...friends,
-                                { id: pending.id, username: pending.username },
-                              ];
-                            }
-                            return friends;
-                          }
-                        );
-                        queryClient.setQueryData<User[] | undefined>(
-                          'pendings',
-                          (pendings) => {
-                            if (pendings && Array.isArray(pendings)) {
-                              return pendings.filter(
-                                (p) => p.id !== pending.id || pending.type === 0
-                              );
-                            }
-                            return pendings;
-                          }
-                        );
-                      }
-                    },
-                  });
+                  accept(pending.id);
                 }}
               >
                 Accept
@@ -80,7 +42,7 @@ export const Pending = () => {
       </ul>
       <ul>
         <p>sent</p>
-        {data
+        {pendings
           ?.filter((i) => !i.type)
           .map((pending) => (
             <li
@@ -91,23 +53,7 @@ export const Pending = () => {
               <button
                 disabled={isCancelling}
                 onClick={async () => {
-                  cancel(pending.id, {
-                    onSuccess: (data, id) => {
-                      if (data) {
-                        queryClient.setQueryData<User[] | undefined>(
-                          'pendings',
-                          (pendings) => {
-                            if (pendings && Array.isArray(pendings)) {
-                              return pendings.filter(
-                                (p) => p.id !== pending.id || pending.type === 1
-                              );
-                            }
-                            return pendings;
-                          }
-                        );
-                      }
-                    },
-                  });
+                  cancel(pending.id);
                 }}
               >
                 Cancel

@@ -22,3 +22,9 @@
 .scrollbar-thumb-rounded::-webkit-scrollbar-thumb {
   border-radius: 0.25rem;
 }
+
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+}
