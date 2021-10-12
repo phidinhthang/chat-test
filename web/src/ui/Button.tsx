@@ -12,6 +12,8 @@ const sizeClassnames = {
 const colorClassnames = {
   primary:
     'bg-blue-600 hover:bg-blue-700 text-white transition duration-100 ease-in-out focus:ring-2 focus:ring-blue-500',
+  cancel:
+    'bg-red-500 hover:bg-red-600 text-white transition duration-100 ease-in-out focus:ring-2 focus:ring-red-600',
 };
 
 export type ButtonProps = DetailedHTMLProps<

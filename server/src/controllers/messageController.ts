@@ -38,9 +38,10 @@ export const sendMessage = async (req: Request, res: Response) => {
   }
 
   const message = em.create(Message, { owner: userId, conversation, text });
-  await em.persistAndFlush(message);
+  conversation.lastActivity = message.createdAt;
+  await em.persistAndFlush([message, conversation]);
 
-  return res.status(200).send(true);
+  return res.status(200).json(message);
 };
 
 export const createConversation = async (req: Request, res: Response) => {
@@ -84,8 +85,8 @@ export const getConversations = async (req: Request, res: Response) => {
     `
 			select c.*,
       m.id as message_id, m.owner_id as message_onwer_id, m.text as message_text, m.created_at as message_created_at, m.status as message_status, m.is_deleted as message_is_deleted, 
-      owner_one.id as owner_one_id, owner_one.username as owner_one_username, 
-      owner_two.id as owner_two_id, owner_two.username as owner_two_username 
+      owner_one.id as owner_one_id, owner_one.username as owner_one_username, owner_one.is_online as owner_one_is_online, owner_one.last_login_at as owner_one_last_login_at, 
+      owner_two.id as owner_two_id, owner_two.username as owner_two_username, owner_two.is_online as owner_two_is_online, owner_two.last_login_at as owner_two_last_login_at, 
       from conversations c
 			left join messages m on c."id" = m."conversation_id"
       left join users owner_one on owner_one."id" = c."owner_one_id"
@@ -102,13 +103,18 @@ export const getConversations = async (req: Request, res: Response) => {
   conversations.forEach((c) => {
     myMap[c.id] = {
       id: c.id,
+      lastActivity: c.last_activity,
       ownerOne: {
         id: c.owner_one_id,
         username: c.owner_one_username,
+        isOnline: c.owner_one_is_online,
+        lastLoginAt: c.owner_two_last_login_at,
       },
       ownerTwo: {
         id: c.owner_two_id,
         username: c.owner_two_username,
+        isOnline: c.owner_two_is_online,
+        lastLoginAt: c.owner_two_last_login_at,
       },
       messages: [
         {

@@ -5,10 +5,11 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 // import { Header } from './layouts/Header';
 import { Pending } from './pages/Pending';
-import { FriendsList } from './pages/Friends';
+import { FriendsList } from './pages/FriendsList';
 import { Chat } from './ui/Chat';
 import { Test } from './ui/Test';
 import { Layout } from './layouts/Layout';
+import { CurrentConversationProvider } from './contexts/currentConversation';
 
 export const Routes = () => {
   return (
@@ -19,13 +20,15 @@ export const Routes = () => {
           <Route exact path='/register' component={Register} />
         </Switch>
         <Switch>
-          <Layout>
-            <Route exact path='/' component={Home} />
-            <Route exact path='/pending' component={Pending} />
-            <Route exact path='/friends' component={FriendsList} />
-            <Route exact path='/chat' component={Chat} />
-            <Route exact path='/test' component={Test} />
-          </Layout>
+          <Route exact path='/test' component={Test} />
+          <CurrentConversationProvider>
+            <Layout>
+              <Route exact path='/' component={Chat} />
+              <Route exact path='/' component={Home} />
+              <Route exact path='/pending' component={Pending} />
+              <Route exact path='/friends' component={FriendsList} />
+            </Layout>
+          </CurrentConversationProvider>
         </Switch>
         {/* <Header /> */}
       </div>

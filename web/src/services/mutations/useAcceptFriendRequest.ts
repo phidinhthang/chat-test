@@ -22,11 +22,17 @@ export const useAcceptFriendRequest = () => {
         queryClient.setQueryData<{ friends: User[] } | undefined>(
           'friends',
           (friends) => {
-            if (Array.isArray(friends?.friends)) {
+            if (friends && Array.isArray(friends?.friends)) {
               return {
+                ...friends,
                 friends: [
                   ...friends!.friends,
-                  { id: newFriend.id, username: newFriend.username },
+                  {
+                    id: newFriend.id,
+                    username: newFriend.username,
+                    isOnline: false,
+                    lastLoginAt: '',
+                  },
                 ],
               };
             }

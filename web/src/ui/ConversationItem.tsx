@@ -1,4 +1,5 @@
 import React from 'react';
+import { useCurrentConversationContext } from '../contexts/currentConversation';
 
 interface ConversationItemProps {
   lastLoginAt?: string;
@@ -6,6 +7,7 @@ interface ConversationItemProps {
   unreadCount?: number;
   isOnline?: boolean;
   latestMsg?: string;
+  id: string;
 }
 
 export const ConversationItem = ({
@@ -14,10 +16,22 @@ export const ConversationItem = ({
   unreadCount,
   isOnline = false,
   latestMsg = '',
+  id,
 }: ConversationItemProps) => {
   if (isOnline) lastLoginAt = '';
+  const { setConversationId, conversationId } =
+    useCurrentConversationContext()!;
+
   return (
-    <div className='relative flex flex-row items-center p-4 hover:bg-gray-100 w-full'>
+    <div
+      className='relative flex flex-row items-center p-4 hover:bg-gray-100 w-full'
+      onClick={() => {
+        if (conversationId === id) {
+          return;
+        }
+        setConversationId(id);
+      }}
+    >
       <div className='absolute text-xs text-gray-500 right-0 top-0 mr-4 mt-3'>
         {lastLoginAt}
       </div>
