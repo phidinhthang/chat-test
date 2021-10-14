@@ -8,6 +8,9 @@ import { createRefreshToken } from '../utils/createRefreshToken';
 import { createAccessToken } from '../utils/createAccessToken';
 import { getUserId } from '../utils/getUserId';
 import { Conversation } from '../entities/Conversation';
+import { redis } from '../prepared-features/initRedis';
+import { ADD_EMAIL_PREFIX, FORGET_PASSWORD_PREFIX } from '../utils/constants';
+import { sendMail } from '../prepared-features/sendMail';
 
 export const register = async (req: Request, res: Response) => {
   const { username, password }: { username: string; password: string } =
@@ -255,6 +258,162 @@ export const removeFriend = async (req: Request, res: Response) => {
   user.friends.remove(em.getReference(User, otherId));
   other.friends.remove(em.getReference(User, userId));
   await em.persistAndFlush([user, other]);
+
+  return res.status(200).send(true);
+};
+
+/** upcoming controller */
+export const uploadAvatar = async (req: Request, res: Response) => {
+  const { avatarUrl }: { avatarUrl: string } = req.body;
+  const userId = getUserId(req);
+  if (!userId) {
+    return res.status(403).json({ message: 'token expired.' });
+  }
+  const user = await em.findOneOrFail(User, { id: userId });
+
+  user.avatarUrl = avatarUrl;
+  await em.persistAndFlush(user);
+  return res.status(200).send(true);
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  const { password, newPassword }: { password: string; newPassword: string } =
+    req.body;
+  const userId = getUserId(req);
+  if (!userId) {
+    return res.status(403).json({ message: 'token expired.' });
+  }
+  const user = await em.findOneOrFail(User, { id: userId });
+  const match = await argon2.verify(user.password, password);
+
+  if (!match) res.status(400).json({ message: 'Old password do not correct' });
+
+  const hashedPassword = await argon2.hash(newPassword);
+
+  user.password = hashedPassword;
+
+  await em.persistAndFlush(user);
+
+  return res.status(200).send(true);
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email }: { email: string } = req.body;
+
+  const user = await em.findOne(User, { email });
+  if (!user) {
+    return res.status(200).send(true);
+  }
+
+  const token = v4();
+
+  await redis.set(
+    FORGET_PASSWORD_PREFIX + token,
+    user.id,
+    'ex',
+    1000 * 60 * 60 * 24 * 3
+  );
+
+  await sendMail(
+    email,
+    `<a href="http://localhost:3000/change-password/${token}">Doi mat khau</a>`
+  );
+
+  return res.status(200).send(true);
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token, newPassword }: { token: string; newPassword: string } =
+    req.body;
+
+  if (newPassword.length < 4) {
+    return res.status(200).json({
+      errors: [
+        { field: 'password', message: 'Password must have at least 4 char' },
+      ],
+    });
+  }
+
+  const key = FORGET_PASSWORD_PREFIX + token;
+  const userId = await redis.get(key);
+  if (!userId) {
+    return res.status(500).json({
+      errors: [
+        {
+          field: 'token',
+          message: 'Có lỗi xảy ra. Vui lòng thử lại.!',
+        },
+      ],
+    });
+  }
+
+  const user = await em.findOne(User, { id: userId });
+  if (!user) {
+    return res.status(400).json({
+      errors: [
+        {
+          field: 'token',
+          message: 'Tài khoản này không tồn tại.',
+        },
+      ],
+    });
+  }
+
+  user.password = await argon2.hash(newPassword);
+  await redis.del(key);
+  await em.persistAndFlush(user);
+
+  sendRefreshToken(res, createRefreshToken(user));
+
+  return res.status(200).json({ user, accessToken: createAccessToken(user) });
+};
+
+export const addEmail = async (req: Request, res: Response) => {
+  const { email }: { email: string } = req.body;
+
+  const userId = getUserId(req);
+  if (!userId) {
+    return res.status(403).json({ message: 'token expired.' });
+  }
+  const user = await em.findOneOrFail(User, { id: userId });
+
+  const emailExisted = await em.findOne(User, {
+    email,
+  });
+
+  if (emailExisted && emailExisted.id !== user.id) return false;
+
+  const token = v4();
+
+  try {
+    await redis.set(
+      ADD_EMAIL_PREFIX + token,
+      `${user.id}:${email}`,
+      'ex',
+      1000 * 60 * 60 * 24 * 3
+    );
+
+    await sendMail(
+      email,
+      `<a href="http://localhost:3000/confirm-email/${token}">Xác nhận Email</a>`
+    );
+  } catch (err) {
+    console.log('abcdef ', err);
+  }
+  return res.status(200).send(true);
+};
+
+export const confirmEmail = async (req: Request, res: Response) => {
+  const { token }: { token: string } = req.body;
+  const key = await redis.get(ADD_EMAIL_PREFIX + token);
+  if (!key) {
+    return res.status(400).send(false);
+  }
+
+  const [userId, email] = key.split(':');
+  const user = await em.findOneOrFail(User, userId);
+  user.email = email;
+  await em.persistAndFlush(user);
 
   return res.status(200).send(true);
 };

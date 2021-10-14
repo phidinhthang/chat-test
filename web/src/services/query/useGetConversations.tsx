@@ -1,7 +1,7 @@
 import { useQuery } from 'react-query';
 import { client } from '../client';
 
-interface Response {
+export interface ConversationResponse {
   id: string;
   lastActivity: string;
   other: {
@@ -21,7 +21,7 @@ interface Response {
 }
 
 const getConversationFn = () =>
-  client.get<undefined, Response[]>('/messages/conversations');
+  client.get<undefined, ConversationResponse[]>('/messages/conversations');
 
 export const useGetConversations = () =>
   useQuery('conversations', getConversationFn);

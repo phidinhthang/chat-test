@@ -18,8 +18,17 @@ export class User {
   @Property()
   username!: string;
 
+  @Property({ nullable: true })
+  email?: string;
+
   @Property()
   password!: string;
+
+  @Property({ nullable: true })
+  googleId?: string;
+
+  @Property({ nullable: true })
+  avatarUrl?: string;
 
   @Property()
   isOnline: boolean = false;

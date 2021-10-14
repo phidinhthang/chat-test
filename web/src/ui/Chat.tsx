@@ -17,6 +17,8 @@ import { useSendMessage } from '../services/mutations/useSendMessage';
 import { useCurrentConversationContext } from '../contexts/currentConversation';
 import { useQueryClient } from 'react-query';
 import { useGetMessages } from '../services/query/useGetMessages';
+import { ConversationResponse } from '../services/query/useGetConversations';
+import useIntersectionObserver from '../shared-hooks/useIntersectionObserver';
 
 const SECONDARY_AVATAR =
   'https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144';
@@ -31,19 +33,41 @@ export const Chat = () => {
     setText(e.target.value);
   };
   const conversationContext = useCurrentConversationContext()!;
-  useGetMessages(conversationContext.conversationId as string, {
-    enabled: typeof conversationContext.conversationId === 'string',
-  });
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = useGetMessages(
+    conversationContext.conversationId as string,
+    {
+      enabled: typeof conversationContext.conversationId === 'string',
+    }
+  );
   if (!conversationContext?.conversationId) {
     return <p>choose one to chat with</p>;
   }
-  const displayData = messagesDisplayData();
+  const displayDatas = messagesDisplayData();
   const queryClient = useQueryClient();
+
+  const loadMoreButtonRef = React.useRef<any>();
+
+  useIntersectionObserver({
+    target: loadMoreButtonRef,
+    onIntersect: fetchNextPage,
+    enabled: true,
+  });
   return (
     <div
       className={`flex-1 sm:px-4 justify-between flex flex-col overflow-y-auto w-full`}
       style={{ height: height - 68 }}
     >
+      <button
+        onClick={() => fetchNextPage()}
+        ref={loadMoreButtonRef}
+        disabled={!hasNextPage || isFetchingNextPage}
+      >
+        {isFetchingNextPage
+          ? 'loading more'
+          : hasNextPage
+          ? 'Load newer'
+          : 'Nothing to load more'}
+      </button>
       <div className='flex sm:items-center justify-between py-3 border-b-2 border-gray-200'>
         <AvatarHeader
           avatar={
@@ -68,25 +92,27 @@ export const Chat = () => {
         className=' flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch
         '
       >
-        {displayData.map((d, index) => (
-          <GroupMessage
-            variant={d.owner?.isOwner ? 'primary' : 'secondary'}
-            avatar={d.owner?.isOwner ? PRIMARY_AVATAR : SECONDARY_AVATAR}
-            key={index}
-          >
-            {({ variant }) => (
-              <>
-                {d.messages.map((m) => (
-                  <MessageItem
-                    text={m.text}
-                    key={m?.id ? m.id : Math.random()}
-                    variant={variant}
-                  />
-                ))}
-              </>
-            )}
-          </GroupMessage>
-        ))}
+        {displayDatas.map((displayData) =>
+          displayData.map((d, index) => (
+            <GroupMessage
+              variant={d.owner?.isOwner ? 'primary' : 'secondary'}
+              avatar={d.owner?.isOwner ? PRIMARY_AVATAR : SECONDARY_AVATAR}
+              key={index}
+            >
+              {({ variant }) => (
+                <>
+                  {d.messages.map((m) => (
+                    <MessageItem
+                      text={m.text}
+                      key={m?.id ? m.id : Math.random()}
+                      variant={variant}
+                    />
+                  ))}
+                </>
+              )}
+            </GroupMessage>
+          ))
+        )}
       </div>
       <div className='border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0'>
         <div className='relative flex'>
@@ -117,26 +143,10 @@ export const Chat = () => {
               variant='primary'
               onClick={() => {
                 console.log('click');
-                const conversations = queryClient.getQueryData<
-                  {
-                    id: string;
-                    lastActivity: string;
-                    other: {
-                      id: string;
-                      username: string;
-                      isOnline: boolean;
-                      lastLoginAt: string;
-                    };
-                    latestMsg: {
-                      id: string;
-                      text: string;
-                      createdAt: string;
-                      isDeleted: string;
-                      status: string;
-                      owner: string;
-                    };
-                  }[]
-                >('conversations')!;
+                const conversations =
+                  queryClient.getQueryData<ConversationResponse[]>(
+                    'conversations'
+                  )!;
                 const conversation = conversations.find(
                   (i) => i.id === conversationContext.conversationId
                 );
