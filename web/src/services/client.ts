@@ -9,6 +9,11 @@ export const client = axios.create({
 
 export const requestWithoutToken = axios.create({
   baseURL: 'http://localhost:4000',
+  withCredentials: true,
+});
+
+requestWithoutToken.interceptors.response.use((response) => {
+  return response.data;
 });
 
 client.interceptors.request.use(async (config) => {

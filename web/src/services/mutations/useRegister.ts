@@ -2,8 +2,23 @@ import { useMutation, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router';
 import { setAccessToken } from '../../lib/accessToken';
 import { requestWithoutToken } from '../client';
-import { RegisterInput } from '../input/RegisterInput';
-import { UserResponse } from '../response/User';
+
+interface RegisterInput {
+  username: string;
+  password: string;
+}
+
+interface User {
+  id: string;
+  username: string;
+  isOnline: boolean;
+  lastLoginAt: string;
+}
+
+interface UserResponse {
+  user: User;
+  token: string;
+}
 
 const registerFn = ({ username, password }: RegisterInput) =>
   requestWithoutToken.post<RegisterInput, UserResponse>('/register', {

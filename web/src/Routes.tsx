@@ -10,6 +10,7 @@ import { Chat } from './ui/Chat';
 import { Test } from './ui/Test';
 import { Layout } from './layouts/Layout';
 import { CurrentConversationProvider } from './contexts/currentConversation';
+import { UsersList } from './pages/UsersList';
 
 export const Routes = () => {
   return (
@@ -24,9 +25,10 @@ export const Routes = () => {
           <CurrentConversationProvider>
             <Layout>
               <Route exact path='/' component={Chat} />
-              <Route exact path='/' component={Home} />
+              <Route exact path='/fdsa' component={Home} />
               <Route exact path='/pending' component={Pending} />
               <Route exact path='/friends' component={FriendsList} />
+              <Route exact path='/users' component={UsersList} />
             </Layout>
           </CurrentConversationProvider>
         </Switch>

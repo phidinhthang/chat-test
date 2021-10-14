@@ -1,6 +1,5 @@
 import { useQueryClient } from 'react-query';
 import { useCurrentConversationContext } from '../../contexts/currentConversation';
-import { Conversation } from '../../services/response/Conversation';
 import { MessageResponse } from '../../services/response/Message';
 import { User } from '../../services/response/User';
 
@@ -19,13 +18,32 @@ export const messagesDisplayData = () => {
   const queryClient = useQueryClient();
   const { conversationId } = useCurrentConversationContext()!;
   const me = queryClient.getQueryData<User>('me')!;
-  console.log('me ', me);
   const conversations =
-    queryClient.getQueryData<Conversation[]>('conversations')!;
+    queryClient.getQueryData<
+      {
+        id: string;
+        lastActivity: string;
+        other: {
+          id: string;
+          username: string;
+          isOnline: boolean;
+          lastLoginAt: string;
+        };
+        latestMsg: {
+          id: string;
+          text: string;
+          createdAt: string;
+          isDeleted: string;
+          status: string;
+          owner: string;
+        };
+      }[]
+    >('conversations') || [];
   const conversation = conversations.find((i) => i.id === conversationId);
   if (!conversation) {
-    return null;
+    return [];
   }
+  console.log('conversation ', conversationId);
   const messages =
     queryClient.getQueryData<MessageResponse[]>([
       'messages',
@@ -34,9 +52,7 @@ export const messagesDisplayData = () => {
   const messagesMapper: (MessageDisplay & OwnerDisplay)[] = messages.map(
     (m) => {
       const owner =
-        m.ownerId === conversation.ownerOne.id
-          ? conversation.ownerOne
-          : conversation.ownerTwo;
+        m.ownerId === conversation.other.id ? conversation.other : me;
       return {
         id: m.id,
         text: m.text,
@@ -58,23 +74,66 @@ export const messagesDisplayData = () => {
   }[] = [];
 
   messagesMapper.forEach((m, index) => {
-    if (index > 0 && m.ownerId !== messagesMapper[index - 1].ownerId) {
+    if (
+      index > 0 &&
+      m.ownerId !== messagesMapper[index - 1].ownerId &&
+      index !== messagesMapper.length - 1
+    ) {
       displayData.push(messageGroup);
+      console.log('messagegroup ', messageGroup, 'index ', index);
       messageGroup.owner = {
         isOwner: m.isOwner,
         ownerId: m.ownerId,
         ownerName: m.ownerName,
       };
       messageGroup.messages = [{ id: m.id, text: m.text }];
-    } else {
+    } else if (
+      index > 0 &&
+      m.ownerId !== messagesMapper[index - 1].ownerId &&
+      index === messagesMapper.length - 1
+    ) {
+      displayData.push({
+        messages: [{ id: m.id, text: m.text }],
+        owner: {
+          isOwner: m.isOwner,
+          ownerId: m.ownerId,
+          ownerName: m.ownerName,
+        },
+      });
+    } else if (messagesMapper.length === 1) {
+      displayData.push({
+        messages: [{ id: m.id, text: m.text }],
+        owner: {
+          isOwner: m.isOwner,
+          ownerId: m.ownerId,
+          ownerName: m.ownerName,
+        },
+      });
+    } else if (index == 0) {
       messageGroup.owner = {
         isOwner: m.isOwner,
         ownerId: m.ownerId,
         ownerName: m.ownerName,
       };
       messageGroup.messages.push({ id: m.id, text: m.text });
+    } else if (
+      index > 0 &&
+      m.ownerId === messagesMapper[index - 1].ownerId &&
+      index !== messagesMapper.length - 1
+    ) {
+      messageGroup.messages.push({ id: m.id, text: m.text });
+    } else if (
+      index > 0 &&
+      m.ownerId === messagesMapper[index - 1].ownerId &&
+      index === messagesMapper.length - 1
+    ) {
+      messageGroup.messages.push({ id: m.id, text: m.text });
+      displayData.push(messageGroup);
     }
   });
+
+  console.log('messagesMapper', messagesMapper);
+  console.log('displayData', displayData);
 
   return displayData;
 };

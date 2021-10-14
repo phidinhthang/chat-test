@@ -2,6 +2,7 @@ import React from 'react';
 import { useAcceptFriendRequest } from '../services/mutations/useAcceptFriendRequest';
 import { useCancelFriendRequest } from '../services/mutations/useCancelFriendRequest';
 import { useGetPendingRequests } from '../services/query/useGetPendingRequests';
+import { Button } from '../ui/Button';
 
 export const Pending = () => {
   const { pendings, isLoading, isError, error } = useGetPendingRequests();
@@ -29,14 +30,14 @@ export const Pending = () => {
               style={{ display: 'flex', justifyContent: 'space-between' }}
             >
               <p>{pending.username}</p>
-              <button
+              <Button
                 disabled={isAccepting}
                 onClick={async () => {
                   accept(pending.id);
                 }}
               >
                 Accept
-              </button>
+              </Button>
             </li>
           ))}
       </ul>

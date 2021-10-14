@@ -4,6 +4,7 @@ import { Form, Formik } from 'formik';
 import { Button } from '../ui/Button';
 import { InputField } from '../ui/InputField';
 import { useLogin } from '../services/mutations/useLogin';
+import { Link } from '../ui/Link';
 
 export const Login: React.FC<RouteComponentProps> = ({ history }) => {
   const { mutate, isError, error } = useLogin();
@@ -32,6 +33,9 @@ export const Login: React.FC<RouteComponentProps> = ({ history }) => {
                 placeholder='password'
                 errorMsg={errors.password}
               />
+              <div>
+                <Link href='/register'>register</Link>
+              </div>
               <div className='mt-5 flex items-start justify-center'>
                 <Button loading={isSubmitting} type='submit' className='w-full'>
                   Submit

@@ -28,6 +28,7 @@ export const Navbar = () => {
           '
         >
           <NavLink href='/friends'>Friend</NavLink>
+          <NavLink href='/users'>Users</NavLink>
           <div className='ml-5'>
             <Avatar avatar='/logo.png' size='medium' />
           </div>

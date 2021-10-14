@@ -1,9 +1,24 @@
 import { useMutation, useQueryClient } from 'react-query';
-import { LoginInput } from '../input/LoginInput';
 import { requestWithoutToken } from '../client';
 import { useHistory } from 'react-router';
-import { UserResponse } from '../response/User';
 import { setAccessToken } from '../../lib/accessToken';
+
+interface LoginInput {
+  username: string;
+  password: string;
+}
+
+interface User {
+  id: string;
+  username: string;
+  isOnline: boolean;
+  lastLoginAt: string;
+}
+
+interface UserResponse {
+  user: User;
+  token: string;
+}
 
 const login = ({ username, password }: LoginInput) =>
   requestWithoutToken.post<LoginInput, UserResponse>('/login', {

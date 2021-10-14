@@ -23,6 +23,7 @@ export const RoundedButton = ({
   children,
   size = 'medium',
   variant = 'secondary',
+  ...props
 }: RoundedButtonProps) => {
   return (
     <button
@@ -31,6 +32,7 @@ export const RoundedButton = ({
 				${variantClassnames[variant]}
 				${sizeClassnames[size]}
 			`}
+      {...props}
     >
       {children}
     </button>

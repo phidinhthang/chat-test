@@ -19,6 +19,7 @@ import { em } from './mikro-orm.config';
       credentials: true,
     })
   );
+  console.log(process.env.FRONTEND_URL);
   app.use(express.json());
   app.use(cookieParser());
 
